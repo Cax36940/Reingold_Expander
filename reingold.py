@@ -1,7 +1,60 @@
-# Notation N or D instead of [|1, N|] or [|1, D|]
 
+##### Useful Functions #####
+
+def graphPower(G, n):
+    """
+        Computes G^n
+
+        G : graph
+        n : int
+
+        return : graph G'
+    """
+
+
+def zigzagProduct(G, H):
+    """
+        Computes G Ⓩ H, the zigzag product between G and H
+
+        G : graph
+        H : graph
+
+        return : G' : graph
+    """
+
+
+def secondEV(G):
+    """
+        Computes the second largest eigenvalue of G
+
+        G : graph
+
+        return : λ : float
+    """
+
+def pathLength(N, D):
+    """
+        Computes the max length of a log path in a (N, D, 1/2) expander
+
+        N : int
+        D : int
+
+        return : Delta : int
+    """
+
+def maxPower(N, D):
+    """
+        Computes the max number of iteration for the Reingold Algorithm
+
+        N : int
+        D : int
+
+        return : l : int
+    """ 
 
 ##### USTCON #####
+
+# Notation N or D instead of [|1, N|] or [|1, D|]
 
 def rotH(vertex, edge):
     """
@@ -31,7 +84,6 @@ def rotGreg(vertex, edge):
         return : (vertex', edge') : ((int, int), int[16])
     """
     return 0
-
 
 
 def rotGexp(vertex, edge):
@@ -93,11 +145,7 @@ def Acon(s, t):
     """
 
 
-
 ##### UTS / UXS #####
-
-
-
 
 def piPerm(x):
     """
