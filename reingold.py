@@ -1,5 +1,23 @@
+import networkx as nx
 import numpy as np
+
 ##### Useful Functions #####
+
+def random_graph(D, N):
+    """
+    Returns a random D-regular connected graph on N vertices
+
+    D : int
+    N : int
+
+    return G : graph
+    """
+    # Generate a random D-regular graph
+    G = nx.random_regular_graph(D, N)
+    while not nx.is_connected(G): # Verify if it is connected
+        G = nx.random_regular_graph(D, N)
+    return nx.to_numpy_array(G)
+
 
 def graphPower(G, n):
     """
@@ -58,7 +76,24 @@ def maxPower(N, D):
 # Notation N or D instead of [|1, N|] or [|1, D|]
 
 D = 67 * 67 # q = 67
-#TODO peut-êre utiliser un cycle
+
+def rotH_simple(vertex, edge, nb_vertices = 3) :
+    """
+    Rotation map for cycle on nb_vertices vertices
+    Uses pi-permutation (0, 1) -> (1, 0)
+
+    vertex : int    in [0, nb_vertices]
+    edge :   int    in [0, 1]
+    nb_vertices : int (default value = 3)
+    
+    return (vertex', edge') : (int, int)
+    
+    
+    """
+    if edge == 0 :
+        return [(vertex-1)%nb_vertices, 1]
+    return [(vertex-1)%nb_vertices, 0]
+
 def rotH(vertex, edge):
     """
         Rotation map of (D^16, D, 1/2) graph H
@@ -373,4 +408,17 @@ def UXS(N, Dmax):
     return toXS(UTS(N, Dmax))
 #TODO faire un graph, sa transformation en TS en XS
 # print(maxPower(8, 67*67))
-Ae2p([[1 for i in range(16)] for k in range(6)], [1 for i in range(16)], 8)
+# Ae2p([[1 for i in range(16)] for k in range(6)], [1 for i in range(16)], 8)
+
+def test_main_transformation_step(D, N) :
+    g = random_graph(D, N)
+    # print(g)
+    eigen = np.linalg.eigvals(g)
+    eigen = map(abs, eigen)
+    eigen = sorted(eigen)
+    # print(eigen)
+    lamb = eigen[-2]/D
+    print("Lambda value for a random (" + str(N) + ", " + str(D) + " lambda) graph : " + str(lamb))
+
+
+test_main_transformation_step(3, 8)
