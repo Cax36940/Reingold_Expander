@@ -3,12 +3,12 @@ import numpy as np
 
 ##### Useful Functions #####
 
-def random_graph(D, N):
+def random_graph(N, D):
     """
     Returns a random D-regular connected graph on N vertices
 
-    D : int
     N : int
+    D : int
 
     return G : graph
     """
@@ -29,6 +29,16 @@ def graphPower(G, n):
         return : graph G'
     """
 
+def graphPowerMatrix(G, n):
+    """
+        Computes G^n
+
+        G : graph (int[][])
+        n : int
+
+        return : graph G'
+    """
+    return np.linalg.matrix_power(G, n)
 
 def zigzagProduct(G, H):
     """
@@ -41,14 +51,73 @@ def zigzagProduct(G, H):
     """
 
 
+def neighbours(G, v) :
+    """
+    Return the neighbours of vertex v in the graph G
+
+    G : graph (int[][])
+    v : int
+
+    return : neigh : int[]
+
+    """
+    neigh = []
+    for i in range(len(G)) :
+        for j in range(int(G[v][i])):
+            neigh.append(i)
+    
+    return neigh
+
+def zigzagProductMatrix(G, H):
+    """
+        Computes G Ⓩ H, the zigzag product between G and H
+
+        G : graph (int[][])
+        H : graph (int[][])
+
+        return : G' : graph (int[][])
+    """
+
+    degG = int(sum(G[0]))
+
+    if degG != len(H):
+        print("Graph H don't have the right size, must be equal to deg of G")
+        return [[]]
+
+    newN = int(len(G) * degG)
+
+    GoH = np.zeros((newN, newN))
+
+    for i in range(newN):
+        iG = int(i // degG)
+        iH = int(i % degG)
+        neigh_iG = neighbours(G, iG) # Neighbours of i in G
+        neigh_iH = neighbours(H, iH) # Neighbours of i in H (short edge)
+
+        jG_list = [neigh_iG[k] for k in neigh_iH] # (long edge)
+
+        for jG in jG_list:
+            for jH in neighbours(H, neighbours(G, jG).index(iG)): # (short edge)
+                GoH[i][jG * degG + jH] += 1
+                GoH[jG * degG + jH][i] += 1
+    
+    return GoH / 2 # Every edge is counted 2 times here
+
+
+
+
 def secondEV(G):
     """
         Computes the second largest eigenvalue of G
 
-        G : graph
+        G : graph (int[][])
 
         return : λ : float
     """
+    eigen = np.linalg.eigvals(G) # eigenvalues of G
+    eigen = map(abs, eigen) # take absolute value
+    eigen = sorted(eigen) # sort
+    return eigen[-2]/sum(G[0]) # return second greatest normalized value
 
 def pathLength(N, D):
     """
@@ -87,7 +156,6 @@ def rotH_simple(vertex, edge, nb_vertices = 3) :
     nb_vertices : int (default value = 3)
     
     return (vertex', edge') : (int, int)
-    
     
     """
     if edge == 0 :
@@ -410,15 +478,45 @@ def UXS(N, Dmax):
 # print(maxPower(8, 67*67))
 # Ae2p([[1 for i in range(16)] for k in range(6)], [1 for i in range(16)], 8)
 
-def test_main_transformation_step(D, N) :
-    g = random_graph(D, N)
-    # print(g)
-    eigen = np.linalg.eigvals(g)
-    eigen = map(abs, eigen)
-    eigen = sorted(eigen)
-    # print(eigen)
-    lamb = eigen[-2]/D
+def test_main_transform_step(D, N) :
+    G = random_graph(D, N)
+    lamb = secondEV(G)
     print("Lambda value for a random (" + str(N) + ", " + str(D) + " lambda) graph : " + str(lamb))
 
+def complete_graph(n):
+    H = np.zeros((n,n))
+    for i in range(n):
+        H[i][(i+1)%n] = 1
+        H[(i+1)%n][i] = 1
+    
+    return H
 
-test_main_transformation_step(3, 8)
+def test_simple_main_transform_step(N, D) :
+
+    # H is the complete graph on D vertices
+    H = complete_graph(D)
+    # print(H)
+
+    # G is a random 3-regular graph
+    G = random_graph(N, D)
+    print(G)
+
+    lamb = secondEV(G)
+
+    # computes the zigzag product between G and H
+    GoH = zigzagProductMatrix(G, H)
+    # print(GoH)
+    # print(len(GoH))
+    # print(int(sum(GoH[0])))
+
+    # 8th power of the resulting graph
+    GoH8 = graphPowerMatrix(GoH, 8)
+
+    lamb2 = secondEV(GoH8)
+
+    print("λ(G)² : " + str(lamb**2))
+    print("λ(GoH⁸) : " + str(lamb2))
+
+
+# test_main_transformation_step(3, 8)
+# test_simple_main_transform_step(8, 3)
