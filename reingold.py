@@ -59,7 +59,15 @@ def graphPower(G, n):
 
         return : graph G'
     """
-    
+    def NRot(node, path): #node in [0,N] and path = (x for x in [D])
+        Nnode = node
+        Npath = []
+        for i in range(n):
+            (Nnode, idx) = G(Nnode,path[i])
+            Npath.append(idx)
+        return (Nnode,Npath)
+    return NRot
+
 
 def zigzagProduct(G, H):
     """
