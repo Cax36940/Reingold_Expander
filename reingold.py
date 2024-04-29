@@ -1,6 +1,6 @@
 import networkx as nx
 import numpy as np
-
+import matplotlib.pyplot as plt
 ##### Useful Functions #####
 
 def random_graph(N, D):
@@ -520,3 +520,17 @@ def test_simple_main_transform_step(N, D) :
 
 # test_main_transformation_step(3, 8)
 # test_simple_main_transform_step(8, 3)
+
+def test_zig_zag_product():
+    G = random_graph(6,4)
+    #nx.draw(nx.from_numpy_array(G))
+    print(G)
+    H = np.array([[0.,0.,1.,0.],[0.,0.,0.,1.],[1.,0.,0.,0.],[0.,1.,0.,0.]])
+    #nx.draw(nx.from_numpy_array(H))
+    GoH = zigzagProductMatrix(G,H)
+    print(GoH)
+
+    nx.draw(nx.from_numpy_array(GoH))
+    plt.show()
+
+test_zig_zag_product()
