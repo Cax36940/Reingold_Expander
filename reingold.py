@@ -534,7 +534,7 @@ def test_zig_zag_product():
     nx.draw(nx.from_numpy_array(GoH))
     plt.show()
 
-def f(lamb, alph):
+def zigzag_eigen(lamb, alph):
     a = (1 - alph**2)
     b = sqrt(a*a * lamb*lamb + 4*alph**2)
     return 1/2*(a * lamb + b)
@@ -558,9 +558,29 @@ def test_eigen_value_zigzag_product():
 
     lamb2 = secondEV(GoH)
 
-    lambth = f(lamb, alpha)
+    lambth = zigzag_eigen(lamb, alpha)
 
-    print("eigen value with zigzag product:",lamb2)
-    print("eigen value with theoritical formula",lambth)
+    print("eigen value with zigzag product :\t",lamb2)
+    print("eigen value with theoritical formula :\t",lambth)
+
+def test_eigen_value_power():
+    N = 8
+    D = 3
+
+    # G is a random 3-regular graph
+    G = random_graph(N, D)
+    print(G)
+
+    lamb = secondEV(G)
+    # computes the zigzag product between G and H
+    G8 = graphPowerMatrix(G, 8)
+
+    lamb8 = secondEV(G8)
+
+    lambth = lamb ** 8
+
+    print("eigen value with 8th power : \t\t",lamb8)
+    print("eigen value with theoritical formula : \t",lambth)
 
 test_eigen_value_zigzag_product()
+test_eigen_value_power()
