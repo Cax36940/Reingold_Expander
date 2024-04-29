@@ -1,7 +1,7 @@
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
-##### Useful Functions #####
+from math import sqrt ##### Useful Functions #####
 
 def random_graph(N, D):
     """
@@ -495,6 +495,7 @@ def test_simple_main_transform_step(N, D) :
 
     # H is the complete graph on D vertices
     H = complete_graph(D)
+    print(H)
     # print(H)
 
     # G is a random 3-regular graph
@@ -533,4 +534,33 @@ def test_zig_zag_product():
     nx.draw(nx.from_numpy_array(GoH))
     plt.show()
 
-test_zig_zag_product()
+def f(lamb, alph):
+    a = (1 - alph**2)
+    b = sqrt(a*a * lamb*lamb + 4*alph**2)
+    return 1/2*(a * lamb + b)
+
+def test_eigen_value_zigzag_product():
+    N = 8
+    D = 3
+    # H is the complete graph on D vertices
+    H = complete_graph(D)
+    print(H)
+    # print(H)
+
+    # G is a random 3-regular graph
+    G = random_graph(N, D)
+    print(G)
+
+    lamb = secondEV(G)
+    alpha = secondEV(H)
+    # computes the zigzag product between G and H
+    GoH = zigzagProductMatrix(G, H)
+
+    lamb2 = secondEV(GoH)
+
+    lambth = f(lamb, alpha)
+
+    print("eigen value with zigzag product:",lamb2)
+    print("eigen value with theoritical formula",lambth)
+
+test_eigen_value_zigzag_product()
