@@ -555,3 +555,14 @@ def complete_graph(n):
         H[(i+1)%n][i] = 1
     
     return H
+
+
+def RotMap_to_adjacenceMatrix(f,D,N):
+    AMatrix = np.array([[0]*N]*N)
+    for u in range(N):  
+        for i in range(D):
+            (v,j) = f(u,i)
+            AMatrix[u][v] = 1
+    return AMatrix
+
+
