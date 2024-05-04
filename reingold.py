@@ -19,7 +19,7 @@ def random_graph(N, D):
     return nx.to_numpy_array(G)
 
 
-def graphPower(G, n):
+def graphPowerRotationMap(G, n):
     """
         Computes G^n
 
@@ -104,8 +104,6 @@ def zigzagProductMatrix(G, H):
     return GoH / 2 # Every edge is counted 2 times here
 
 
-
-
 def secondEV(G):
     """
         Computes the second largest eigenvalue of G
@@ -119,15 +117,15 @@ def secondEV(G):
     eigen = sorted(eigen) # sort
     return eigen[-2]/sum(G[0]) # return second greatest normalized value
 
-def pathLength(N, D):
+def pathLength(N):
     """
         Computes the max length of a log path in a (N, D, 1/2) expander
 
         N : int
-        D : int
 
         return : Delta : int
     """
+    return 4 * int(np.ceil(N))
 
 def maxPower(N, D):
     """
@@ -140,11 +138,19 @@ def maxPower(N, D):
     """ 
     return int(np.ceil(-np.log2(-np.log2(1-1/(D*N*N)))))
 
+
+def rotationMapConstructor(G):
+    """
+        Returns the rotationMap function for the graph G
+
+        G : graph (int[][])
+    
+        return : (int, int) -> ()
+    """
+
 ##### USTCON #####
 
 # Notation N or D instead of [|1, N|] or [|1, D|]
-
-D = 67 * 67 # q = 67
 
 def rotH_simple(vertex, edge, nb_vertices = 3) :
     """
@@ -159,10 +165,10 @@ def rotH_simple(vertex, edge, nb_vertices = 3) :
     
     """
     if edge == 0 :
-        return [(vertex-1)%nb_vertices, 1]
-    return [(vertex-1)%nb_vertices, 0]
+        return (vertex-1)%nb_vertices, 1
+    return (vertex-1)%nb_vertices, 0
 
-def rotH(vertex, edge):
+def rotH_complete(vertex, edge):
     """
         Rotation map of (D^16, D, 1/2) graph H
 
@@ -190,43 +196,42 @@ def rotH(vertex, edge):
 
     c = [(a[i] + b[i])%q for i in range(d + 1)]
 
-
-    invy = -y % q
-
     new_vertex = [0 for i in range(16)]
 
     for i in range(16):
-        new_vertex[i] = c[2*i] * 67 + c[2*i+1]
+        new_vertex[i] = c[2*i] * q + c[2*i+1]
+
+    return [new_vertex, x*q + ((-y)%q)]
 
 
-    return [new_vertex, x*67 + ((-y)%67)]
-
-
-def rotGreg(vertex, edge):
+def rotGreg(vertex, edge, G):
     """
-        Rotation map of N² vertex D^16 regular graph based on G
+        Rotation map of N² vertex regular graph based on G
 
-        global graph G
-        global const D
-        global const N
-
+        G :      graph (int[][])
         vertex : (int, int) in N x N
-        edge : int[16]      in D^16
-
-        return : (vertex', edge') : ((int, int), int[16])
+        edge :   int
+        
+        return : (vertex', edge') : ((int, int), int)
     """
-    return 0
+    N = len(G)
+    if edge == 1:
+        return (vertex[0],(vertex[1]+1)%N), 2
+    if edge == 2:
+        return (vertex[0],(vertex[1]-1)%N), 1
+    if G[vertex[0]][vertex[1]] :
+        return (vertex[1],vertex[0]), edge
+
+    return vertex, edge
 
 #TODO Test une itération de Reingold avec une H = 3-cycle
 #       on pourrait faire le test avec plusieurs graphes de degré 3
-def rotGexp(vertex, edge):
+def rotGexp_complete(vertex, edge, G, rotH, D):
     """
         Rotation map of (N² x (D^16)^L, D^16, 1/2) expander graph
 
         global const D
         global const N
-
-        computes L as in 3.1
 
         dependancies :
             rotH
@@ -235,9 +240,74 @@ def rotGexp(vertex, edge):
         vertex : [(int, int), int[L][16]]   in N² x (D^16)^L
         edge : int[16]                      in D^16
 
+
+
         return : (vertex', edge') : ([(int, int), int[L][16]], int[16])
     """
-    return 0
+
+    N = len(G)
+    # l = maxPower(N, D)
+    l = 1
+    # Allocate variables
+    a = [[0 for i in range(16)] for k in range(l + 1)]
+    I = 0
+    j = [0 for i in range(l + 1)]
+
+    # Initialise variables
+    for i in range(l):
+        for k in range(16):
+            a[i][k] = vertex[i][k]
+    for k in range(16):  
+        a[l][k] = edge[k]
+
+    I = l
+
+    for i in range(1, l + 1):
+        j[i] = 1
+    
+
+    while 1 :
+
+        # Step 1
+        # print(a)
+        new_a = rotH(a[I-1],a[I][j[I]-1])
+        a[I-1] = new_a[0]
+        a[I][j[I]-1] = new_a[1]
+
+        # Step 2
+        if j[I]%2:
+            if I == 1 :
+                if a[0][:-2] == [1 for i in range(15)]:
+                    if a[0][15] <= 3 :
+                        print((a[0][15], piPerm(a[0][15])))
+                        a[0] = piPerm(a[0])
+                j[I] += 1
+
+        # Step 3
+            elif I > 1 :
+                j[I-1] = 1
+                I -= 1
+         
+        # Step 4
+        elif j[I] == 16 :
+            #reverse a[I]
+            for i in range(8):
+                tmp = a[I][i]
+                a[I][i] = a[I][15 - i]
+                a[I][15 - i] = tmp
+        
+        # Step 5
+            if I == l :
+                break
+
+        # Step 6
+            elif I < l :
+                j[I + 1] += 1
+                I += 1
+        else:
+            j[I] += 1
+
+    return path, vertex
 
 
 def Aexp(s, t):
@@ -261,12 +331,10 @@ def Aexp(s, t):
 
 def Acon(s, t):
     """
-        Return true if s and t are connected in Greg, implying connexity in G
+        Return true if s and t are connected in Gexp, implying connexity in G
 
         global const D
         global const N
-
-        computes L
 
         dependancies :
             Aexp
@@ -276,6 +344,8 @@ def Acon(s, t):
 
         return : con : boolean
     """
+
+
 
 
 ##### UTS / UXS #####
@@ -478,11 +548,6 @@ def UXS(N, Dmax):
 # print(maxPower(8, 67*67))
 # Ae2p([[1 for i in range(16)] for k in range(6)], [1 for i in range(16)], 8)
 
-def test_main_transform_step(D, N) :
-    G = random_graph(D, N)
-    lamb = secondEV(G)
-    print("Lambda value for a random (" + str(N) + ", " + str(D) + " lambda) graph : " + str(lamb))
-
 def complete_graph(n):
     H = np.zeros((n,n))
     for i in range(n):
@@ -491,7 +556,7 @@ def complete_graph(n):
     
     return H
 
-def test_simple_main_transform_step(N, D) :
+def test_main_transform_step(N, D) :
 
     # H is the complete graph on D vertices
     H = complete_graph(D)
@@ -506,9 +571,6 @@ def test_simple_main_transform_step(N, D) :
 
     # computes the zigzag product between G and H
     GoH = zigzagProductMatrix(G, H)
-    # print(GoH)
-    # print(len(GoH))
-    # print(int(sum(GoH[0])))
 
     # 8th power of the resulting graph
     GoH8 = graphPowerMatrix(GoH, 8)
@@ -518,9 +580,7 @@ def test_simple_main_transform_step(N, D) :
     print("λ(G)² : " + str(lamb**2))
     print("λ(GoH⁸) : " + str(lamb2))
 
-
-# test_main_transformation_step(3, 8)
-# test_simple_main_transform_step(8, 3)
+# test_main_transform_step(8, 3)
 
 def test_zig_zag_product():
     G = random_graph(6,4)
@@ -556,11 +616,11 @@ def test_eigen_value_zigzag_product():
     # computes the zigzag product between G and H
     GoH = zigzagProductMatrix(G, H)
 
-    lamb2 = secondEV(GoH)
+    lamb = secondEV(GoH)
 
     lambth = zigzag_eigen(lamb, alpha)
 
-    print("eigen value with zigzag product :\t",lamb2)
+    print("eigen value with zigzag product :\t",lamb)
     print("eigen value with theoritical formula :\t",lambth)
 
 def test_eigen_value_power():
@@ -579,8 +639,10 @@ def test_eigen_value_power():
 
     lambth = lamb ** 8
 
-    print("eigen value with 8th power : \t\t",lamb8)
-    print("eigen value with theoritical formula : \t",lambth)
+    print("eigen value with 8th power : \t\t", lamb8)
+    print("eigen value with theoritical formula : \t", lambth)
+
 
 test_eigen_value_zigzag_product()
-test_eigen_value_power()
+# test_eigen_value_power()
+# test_zig_zag_product()
