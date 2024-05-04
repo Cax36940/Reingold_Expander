@@ -1,6 +1,6 @@
 
 from reingold import *
-
+import USTCON as st
 
 def test_main_transform_step(N, D) :
 
@@ -88,7 +88,26 @@ def test_eigen_value_power():
     print("eigen value with 8th power : \t\t", lamb8)
     print("eigen value with theoritical formula : \t", lambth)
 
+def test_rotMap():
+    G = np.array([[0,1,0,1],[1,0,1,0],[0,1,0,1],[1,0,1,0]]) #cycle de 4 sommets
 
-test_eigen_value_zigzag_product()
+    f = st.rot(G)
+
+    for i in range(4):
+        for j in range(2):
+            print((i,j + 1),"->",f(i,j + 1))
+
+def test_rotMap_to_Amatrix():
+    G = np.array([[0,1,0,1],[1,0,1,0],[0,1,0,1],[1,0,1,0]]) #cycle de 4 sommets
+
+    f = st.rot(G)
+
+    H = st.RotMap_to_adjacenceMatrix(f,2,len(G))
+
+    print(G)
+    print(H)
+
+test_rotMap_to_Amatrix()
+#test_eigen_value_zigzag_product()
 # test_eigen_value_power()
 # test_zig_zag_product()
