@@ -292,7 +292,7 @@ def Aexp(G, s, t):
 
 
 
-def Acon(s, t):
+def Acon(G, s, t):
     """
         Return true if s and t are connected in Greg, implying connexity in G
 
@@ -307,3 +307,7 @@ def Acon(s, t):
 
         return : con : boolean
     """
+    lmax = maxPower(N,D)
+    pS = (s, [].append(1) for i in range(lmax))
+    pT = (t, [].append(1) for i in range(lmax))
+    return Aexp(G,pS,pT)
