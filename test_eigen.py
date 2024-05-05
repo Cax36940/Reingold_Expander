@@ -1,5 +1,7 @@
 from matrix_op import *
 from utils import *
+import matplotlib.pyplot as plt
+
 
 def test_eigen_value_power():
     N = 8
@@ -140,10 +142,58 @@ def test_n_times_main_transformation(n):
     print(accurate/n)
 
 
+def test_eigen_main_transform_graph():
+    D = 3
+    H = complete_graph(D)
+    nb_iter = 100
+
+
+
+    X = [x for x in range(4, 51, 2)]
+    lambG_list = []
+    lamb2G_list = []
+    lambGoH8_list = []
+    for N in X:
+        sum_lambG = 0
+        sum_lamb2G = 0
+        sum_lambGoH8 = 0
+        for i in range(nb_iter):
+            print(N, i)
+            G = random_regular_graph(N, D)
+            GoH = zigzagProductMatrix(G, H)
+            GoH8 = graphPowerMatrix(GoH, 8)
+
+            lambG = secondEV(G)
+            lamb2G = lambG * lambG
+            lambGoH8 = secondEV(GoH8)
+
+            sum_lambG += lambG
+            sum_lamb2G += lamb2G
+            sum_lambGoH8 += lambGoH8
+
+        lambG_list.append(sum_lambG/nb_iter)
+        lamb2G_list.append(sum_lamb2G/nb_iter)
+        lambGoH8_list.append(sum_lambGoH8/nb_iter)
+    
+    plt.plot(X, lambG_list, label='λ(G)')
+    plt.plot(X, lamb2G_list, label='λ(G)²')
+    plt.plot(X, lambGoH8_list, label='λ(GoH⁸)')
+
+    plt.xlabel('Number of Vertices', fontsize=20)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.legend(fontsize=20)
+    plt.show()
+
+
+
+
+
 if __name__ == "__main__":
     test_eigen_value_zigzag_product()
     test_eigen_value_power()
     test_eigen_value_main_transform()
-    test_n_times_powering(1000)
-    test_n_times_zigzag_product(1000)
-    test_n_times_main_transformation(1000)
+    # test_n_times_powering(1000)
+    # test_n_times_zigzag_product(1000)
+    # test_n_times_main_transformation(1000)
+    test_eigen_main_transform_graph()

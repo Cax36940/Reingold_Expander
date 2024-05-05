@@ -91,7 +91,7 @@ def random_non_connected_graph(N):
 
 def random_regular_graph(N, D):
     """
-    Returns a random D-regular connected graph on N vertices
+    Returns a random D-regular connected non-bipartite graph on N vertices
 
     N : int
     D : int

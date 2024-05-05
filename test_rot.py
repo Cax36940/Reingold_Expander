@@ -15,7 +15,7 @@ def test_regularize_rot():
     Compare the regularisation obtained using matrix or rotation map
     """
     N = 8
-    G = random_graph(N)
+    G = random_connected_graph(N)
 
     trueGreg = regularize(G)
     

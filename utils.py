@@ -66,3 +66,5 @@ def int_to_list(value, length, modulus):
         value = value // modulus
     a.reverse()
     return a
+
+print(maxPower(8, 3))
