@@ -60,7 +60,7 @@ def rotMap_to_adjacencyMatrix(f, N, D):
 
 ##### Graph Generation #####
 
-def random_graph(N):
+def random_connected_graph(N):
     """
     Returns a random connected graph on N vertices
 
@@ -72,6 +72,20 @@ def random_graph(N):
     G = nx.gnp_random_graph(N, 0.5)
     while not nx.is_connected(G): # Verify if it is connected
         G = nx.gnp_random_graph(N, 0.5)
+    return nx.to_numpy_array(G)
+
+def random_non_connected_graph(N):
+    """
+    Returns a random non-connected graph on N vertices
+
+    N : int
+
+    return G : graph (int[][])
+    """
+    # Generate a random D-regular graph
+    G = nx.gnp_random_graph(N, 0.1)
+    while nx.is_connected(G): # Verify if it is connected
+        G = nx.gnp_random_graph(N, 0.1)
     return nx.to_numpy_array(G)
 
 
@@ -86,7 +100,7 @@ def random_regular_graph(N, D):
     """
     # Generate a random D-regular graph
     G = nx.random_regular_graph(D, N)
-    while not nx.is_connected(G): # Verify if it is connected
+    while not nx.is_connected(G) or nx.is_bipartite(G): # Verify if it is connected
         G = nx.random_regular_graph(D, N)
     return nx.to_numpy_array(G)
 

@@ -44,3 +44,25 @@ def secondEV(G):
     eigen = map(abs, eigen) # take absolute value
     eigen = sorted(eigen) # sort
     return eigen[-2]/sum(G[0]) # return second greatest normalized value
+
+
+def list_to_int(l, length, modulus):
+    """
+    Convert a list of int in range modulus of size length to an int in range modulus^length
+    """
+    a = 0
+    for i in range(length):
+        a *= modulus
+        a += l[i]
+    return a
+
+def int_to_list(value, length, modulus):
+    """
+    Convert an int in range modulus^length to a list of int in range modulus of size length
+    """
+    a = []
+    for i in range(length):
+        a.append(value % modulus)
+        value = value // modulus
+    a.reverse()
+    return a

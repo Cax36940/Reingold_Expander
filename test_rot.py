@@ -19,7 +19,7 @@ def test_regularize_rot():
 
     trueGreg = regularize(G)
     
-    rotGreg = st.rotRegularize(G)
+    rotGreg = st.rotRegularize(G, N)
     Greg = rotMap_to_adjacencyMatrix(rotGreg, N*N, 3)
 
     return GraphEquality(Greg, trueGreg, N*N)

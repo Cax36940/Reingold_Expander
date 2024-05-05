@@ -21,8 +21,8 @@ def rotH_simple(nb_vertices = 3) :
     """
     def rotH(vertex, edge):
         if edge == 0 :
-            return (vertex-1)%nb_vertices, 1
-        return (vertex+1)%nb_vertices, 0
+            return ((vertex-1)%nb_vertices, 1)
+        return ((vertex+1)%nb_vertices, 0)
     return rotH
 
 def rotH_complete(vertex, edge):
@@ -37,35 +37,28 @@ def rotH_complete(vertex, edge):
         return : (vertex', edge') : (int[16], int[2])
     """
 
+    print(edge)
     q = 67
     d = 31
     x = edge // q
     y = edge % q
 
-    # convert vertex form int[16] in D^16 to int[32] in q^32
-    a = [0 for i in range(d + 1)]
-
-    for i in range(32):
-        if i % 2 :
-            a[i] = vertex[i//2] % q
-        else :
-            a[i] = vertex[i//2] // q
-        
+    # convert vertex from int in D^16 to int[32] in q^32
+    a = int_to_list(vertex, 32, q)
+    
     b = [(y * (x**i))%q for i in range(d + 1)]
 
     c = [(a[i] + b[i])%q for i in range(d + 1)]
 
-    new_vertex = [0 for i in range(16)]
-
-    for i in range(16):
-        new_vertex[i] = c[2*i] * q + c[2*i+1]
-
-    return [new_vertex, x*q + ((-y)%q)]
+    new_vertex = list_to_int(c, 32, q)
+    new_edge = x*q + ((-y)%q)
+    print(new_edge)
+    return (new_vertex, new_edge)
 
 
 ##### Transformation Functions #####
 
-def rotRegularize(G):
+def rotRegularize(G, N):
     """
         Rotation map of N² vertex regular graph based on G
 
@@ -76,7 +69,6 @@ def rotRegularize(G):
         return : (vertex', edge') -> (int, int)
     """
     def rotGreg(vertex, edge):
-        N = len(G)
         if edge == 0:
             return ((vertex // N) * N + (vertex + 1) % N, 1)
         if edge == 1:
@@ -144,84 +136,92 @@ def rotMainTransform(rotG, rotH, D, d, n):
     return rotGraphPower(rotZigzagProduct(rotG, rotH, D, d), d*d, n) 
 
 
-def rotGexp_simple(rotG, rotH, l):
+def rotGexp_simple(rotG, rotH, l, D, d, n):
     """
         Computes the rotation map for l steps of Reingold main transformation
 
         rotG : Rotation map of the graph G
         rotH : Rotation map of the graph H
         l : int
+        n : int
 
         return : Rotation map
     """
-    # This algorithm can't be executed with the true value of l
     
-    rotGexp = rotMainTransform(rotG, rotH, 8)
+    rotGexp = rotMainTransform(rotG, rotH, D, d, n)
     
     for i in range(l-1):
-        rotGexp = rotMainTransform(rotG, rotH)
+        rotGexp = rotMainTransform(rotGexp, rotH, D, d, n)
 
     return rotGexp
 
 
-def rotGexp_Reingold(vertex, edge, rotG, rotH, N, D):
+def rotGexp_Reingold(rotG, rotH, D, l):
     """
         Rotation map of (N² x (D^16)^L, D^16, 1/2) expander graph
 
         This is the algorithm found at the end of Reingold research paper
 
-        global const D
-        global const N
-
         dependancies :
             rotH
             rotGreg
 
-        vertex : [(int, int), int[L][16]]   in N² x (D^16)^L
-        edge : int[16]                      in D^16
+        vertex : int  in N² x (D^16)^L
+        edge :   int  in D^16
+        rotG : (int, int) -> (int, int)
+        rotH : (int, int) -> (int, int)
+        N : int
+        D : int
+        l : int
 
-
-        return : (vertex', edge') : ([(int, int), int[L][16]], int[16])
+        return : rotGexp : Rotation map
     """
 
-    def rotGexp(vertex, edge):
-        # This algorithm can't be executed with the true value of l
-        # l = maxPower(N, D)
+    D16 = D**16
 
-        l = 5
+    def rotGexp(vertex, edge):
 
         # Allocate variables
+        v = 0
         a = [[0 for i in range(16)] for k in range(l + 1)]
         I = 0
         j = [0 for i in range(l + 1)]
 
         # Initialise variables
-        for i in range(l):
-            for k in range(16):
-                a[i][k] = vertex[i][k]
-        for k in range(16):  
-            a[l][k] = edge[k]
-
+        for i in range(l-1, -1, -1):
+            atmp = vertex % D16
+            for k in range(15, -1, -1):
+                a[i][k] = atmp % D
+                atmp = atmp // D
+            vertex = vertex // D16
+        v = vertex
+        
+        for k in range(15, -1, -1):  
+            a[l][k] = edge % D
+            edge = edge // D
+        print(a)
         I = l
 
         for i in range(1, l + 1):
             j[i] = 1
     
-
-        while 1 :
+        while True :
 
             # Step 1
-            new_a = rotH(a[I-1],a[I][j[I]-1])
-            a[I-1] = new_a[0]
-            a[I][j[I]-1] = new_a[1]
+            aI_1 = list_to_int(a[I-1], 16, D)
+            aI_1, a[I][j[I]-1] = rotH(aI_1,a[I][j[I]-1])
+            a[I-1] = int_to_list(aI_1, 16, D)
 
             # Step 2
-            if j[I]%2:
+            if j[I]%2 == 1:
                 if I == 1 :
-                    if a[0][:-2] == [1 for i in range(15)]:
-                        if a[0][15] <= 3 :
-                            print((a[0][15], piPerm(a[0][15])))
-                            a[0] = piPerm(a[0])
+                    # Convert a[0] from list to int
+                    a0 = list_to_int(a[0], 16, D)
+                    
+                    v, a0 = rotG(v, a0)
+
+                    a[0] = int_to_list(a0, 16, D)
+
                     j[I] += 1
 
                 # Step 3
@@ -231,11 +231,7 @@ def rotGexp_Reingold(vertex, edge, rotG, rotH, N, D):
         
             # Step 4
             elif j[I] == 16 :
-                #reverse a[I]
-                for i in range(8):
-                    tmp = a[I][i]
-                    a[I][i] = a[I][15 - i]
-                    a[I][15 - i] = tmp
+                a[I].reverse()
         
             # Step 5
                 if I == l :
@@ -248,7 +244,15 @@ def rotGexp_Reingold(vertex, edge, rotG, rotH, N, D):
             else:
                 j[I] += 1
         
-        return vertex, edge
+
+        new_vertex = v
+        for i in range(l):
+            new_vertex *= D16
+            new_vertex += list_to_int(a[i], 16, D)
+        print(a)
+        new_edge = list_to_int(a[l], 16, D)
+
+        return new_vertex, new_edge
     return rotGexp
 
 ##### USTCON #####
@@ -308,6 +312,6 @@ def Acon(G, s, t):
         return : con : boolean
     """
     lmax = math.log(2,N)
-    pS = (s, [].append(1) for i in range(lmax))
-    pT = (t, [].append(1) for i in range(lmax))
+    pS = (s, [1 for i in range(lmax)])
+    pT = (t, [1 for i in range(lmax)])
     return Aexp(G,pS,pT)
