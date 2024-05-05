@@ -274,7 +274,7 @@ def Aexp(G, s, t):
     rotG = adjacencyMatrix_to_rotMap(G)
     rotH = rotH_complete
 
-    lmax = maxPower(N,D)
+    lmax = math.log(2,N) 
     
     def Aexprec(vertex,edge,l):
         if l >= lmax:
@@ -307,7 +307,7 @@ def Acon(G, s, t):
 
         return : con : boolean
     """
-    lmax = maxPower(N,D)
+    lmax = math.log(2,N)
     pS = (s, [].append(1) for i in range(lmax))
     pT = (t, [].append(1) for i in range(lmax))
     return Aexp(G,pS,pT)
