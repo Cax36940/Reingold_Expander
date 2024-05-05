@@ -1,5 +1,6 @@
 from utils_graph import *
-
+import math 
+from utils import *
 """ Notation N or D instead of [|1, N|] or [|1, D|] """
 
 ##### Constant Size Graph #####
@@ -252,7 +253,7 @@ def rotGexp_Reingold(vertex, edge, rotG, rotH, N, D):
 
 ##### USTCON #####
 
-def Aexp(s, t):
+def Aexp(G, s, t):
     """
         Return true if s and t are connected in Gexp
 
@@ -266,9 +267,29 @@ def Aexp(s, t):
 
         s : [(int, int), int[L][16]]   in N² x (D^16)^L
         t : [(int, int), int[L][16]]   in N² x (D^16)^L
+        G : a D-regular graph with N vertices
 
         return : con : boolean
     """
+    rotG = adjacencyMatrix_to_rotMap(G)
+    rotH = rotH_complete
+
+    lmax = maxPower(N,D)
+    
+    def Aexprec(vertex,edge,l):
+        if l >= lmax:
+            return edge 
+        else:
+            (Nvertex,Nedge) = rotGexp_Reingold(vertex,edge,rotG,rotH,N,D)
+            Aexprec(Nvertex, Nedge, l+1)
+    l = 0
+    for i in range(D):
+        if (Aexprec(s,i,l) == t):
+            return True
+        l = 0
+    return False
+        
+
 
 
 def Acon(s, t):
