@@ -36,8 +36,6 @@ def rotH_complete(vertex, edge):
 
         return : (vertex', edge') : (int[16], int[2])
     """
-
-    print(edge)
     q = 67
     d = 31
     x = edge // q
@@ -52,7 +50,6 @@ def rotH_complete(vertex, edge):
 
     new_vertex = list_to_int(c, 32, q)
     new_edge = x*q + ((-y)%q)
-    print(new_edge)
     return (new_vertex, new_edge)
 
 
@@ -91,11 +88,13 @@ def rotGraphPower(G, D, n):
     """
     def NRot(v, a): #node in [0,N] and path = (x for x in [D])
         w = v
-        b = 0
+        a = int_to_list(a, n, D)
+        b = []
         for i in range(n):
-            b *= D
-            (w, edgeG) = G(w,(a//D**(n-i-1))%D)
-            b += edgeG
+            (w, edgeG) = G(w, a[i])
+            b.append(edgeG)
+        b.reverse()
+        b = list_to_int(b, n, D)
         return (w,b)
     return NRot
 
@@ -199,7 +198,7 @@ def rotGexp_Reingold(rotG, rotH, D, l):
         for k in range(15, -1, -1):  
             a[l][k] = edge % D
             edge = edge // D
-        print(a)
+
         I = l
 
         for i in range(1, l + 1):
@@ -249,7 +248,7 @@ def rotGexp_Reingold(rotG, rotH, D, l):
         for i in range(l):
             new_vertex *= D16
             new_vertex += list_to_int(a[i], 16, D)
-        print(a)
+
         new_edge = list_to_int(a[l], 16, D)
 
         return new_vertex, new_edge
@@ -300,18 +299,22 @@ def Acon(G, s, t):
     """
         Return true if s and t are connected in Greg, implying connexity in G
 
-        global const D
-        global const N
-
         dependancies :
             Aexp
 
-        s : (int, int)  in N x N
-        t : (int, int)  in N x N
+        G : graph
+        s : int  in N
+        t : int  in N
 
         return : con : boolean
     """
-    lmax = math.log(2,N)
-    pS = (s, [1 for i in range(lmax)])
-    pT = (t, [1 for i in range(lmax)])
-    return Aexp(G,pS,pT)
+
+    N = len(G[0])
+    D = (67*67)**16
+    l = maxPower(N, D)
+
+    rotGreg = rotRegularize(G, N)
+    rotGexp = rotGexp_Reingold(rotGreg, rotH_complete, D, l)
+    pS = (s * N + 1, [1 for i in range(l)])
+    pT = (t * N + 1, [1 for i in range(l)])
+    return Aexp(rotGexp,pS,pT)

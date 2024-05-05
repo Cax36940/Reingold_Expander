@@ -70,7 +70,7 @@ def test_convert():
     rotG = st.adjacencyMatrix_to_rotMap(G)
 
     # Convert back to ajacency matrix
-    testG = st.rotMap_to_adjacencyMatrix(rotG, D, N)
+    testG = st.rotMap_to_adjacencyMatrix(rotG, N, D)
 
     # Compare the initial graph with the resulting graph
     test = True
@@ -84,6 +84,8 @@ def test_convert():
     return test
 
 
-
-
+if __name__ == "__main__":
+    print(test_convert())
+    print(test_matrix_to_rot())
+    print(test_rot_to_matrix())
 
